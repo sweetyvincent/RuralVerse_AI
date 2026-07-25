@@ -14,7 +14,8 @@ import {
   FolderOpen, 
   BookOpen, 
   Users, 
-  Shield, 
+  Shield,
+  PenTool,
   LogOut 
 } from 'lucide-react';
 
@@ -90,8 +91,8 @@ const Sidebar = () => {
             <NavLink to="/ar-lab" className={navClass}>
               {({isActive}) => <><FlaskConical size={20} className={iconClass({isActive})} /> <span>AR Science Lab</span></>}
             </NavLink>
-            <NavLink to="/vr-classroom" className={navClass}>
-              {({isActive}) => <><Glasses size={20} className={iconClass({isActive})} /> <span>VR Classroom</span></>}
+            <NavLink to="/air-writing" className={navClass}>
+              {({isActive}) => <><PenTool size={20} className={iconClass({isActive})} /> <span>Air Writing</span></>}
             </NavLink>
           </nav>
         </div>

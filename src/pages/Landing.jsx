@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Bot, Mic, FlaskConical, Glasses, Brain, WifiOff, Languages, BarChart3, 
+  Bot, Mic, FlaskConical, PenTool, Brain, WifiOff, Languages, BarChart3, 
   ArrowRight, Play, GraduationCap
 } from 'lucide-react';
 import HeroScene from '../components/3d/HeroScene';
@@ -93,7 +93,7 @@ export default function Landing() {
             { icon: Bot, color: "text-blue-400", bg: "bg-blue-400/10", title: "AI Tutor", desc: "Personalized guidance 24/7" },
             { icon: Mic, color: "text-purple-400", bg: "bg-purple-400/10", title: "Voice Learning", desc: "Interactive oral lessons" },
             { icon: FlaskConical, color: "text-emerald-400", bg: "bg-emerald-400/10", title: "AR Science Lab", desc: "Perform virtual experiments" },
-            { icon: Glasses, color: "text-coral-400", bg: "bg-coral-400/10", title: "VR Classroom", desc: "Immersive environments" },
+            { icon: PenTool, color: "text-coral-400", bg: "bg-coral-400/10", title: "Air Writing Camera", desc: "Write in mid-air using hand tracking" },
             { icon: Brain, color: "text-amber-400", bg: "bg-amber-400/10", title: "Smart Quizzes", desc: "Adaptive testing system" },
             { icon: WifiOff, color: "text-cyan-400", bg: "bg-cyan-400/10", title: "Offline Mode", desc: "Learn without internet" },
             { icon: Languages, color: "text-blue-400", bg: "bg-blue-400/10", title: "Multi-Language", desc: "Learn in your mother tongue" },

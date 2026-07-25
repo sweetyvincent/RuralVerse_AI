@@ -8,7 +8,7 @@ import AITutor from './pages/AITutor';
 import VoiceLearning from './pages/VoiceLearning';
 import LearningPath from './pages/LearningPath';
 import ARLab from './pages/ARLab';
-import VRClassroom from './pages/VRClassroom';
+import AirWriting from './pages/AirWriting';
 import QuizGenerator from './pages/QuizGenerator';
 import Analytics from './pages/Analytics';
 import OfflineLearning from './pages/OfflineLearning';
@@ -81,7 +81,7 @@ function AppRoutes() {
       {/* Full Screen Routes (no page padding) */}
       <Route path="/tutor" element={<FullScreenLayout><AITutor /></FullScreenLayout>} />
       <Route path="/ar-lab" element={<DashboardLayout><ARLab /></DashboardLayout>} />
-      <Route path="/vr-classroom" element={<FullScreenLayout><VRClassroom /></FullScreenLayout>} />
+      <Route path="/air-writing" element={<FullScreenLayout><AirWriting /></FullScreenLayout>} />
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
