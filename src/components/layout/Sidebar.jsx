@@ -7,7 +7,6 @@ import {
   Mic, 
   Route, 
   FlaskConical, 
-  Glasses, 
   Brain, 
   BarChart3, 
   WifiOff, 
@@ -18,18 +17,7 @@ import {
   PenTool,
   LogOut 
 } from 'lucide-react';
-
-// Mock useAuth since it's not provided in the prompt context
-const useAuth = () => {
-  return {
-    user: {
-      name: 'Sarah Jenkins',
-      role: 'admin', // Or teacher, student
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
-    },
-    logout: () => console.log('Logged out')
-  };
-};
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -43,29 +31,34 @@ const Sidebar = () => {
   const navClass = ({ isActive }) => 
     `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
       isActive 
-        ? 'bg-gradient-to-r from-blue/20 to-transparent text-blue border-l-2 border-blue font-medium shadow-[inset_0_0_20px_rgba(67,97,238,0.1)]' 
-        : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/10 text-indigo-300 border-l-4 border-indigo-500 font-medium shadow-[inset_0_0_20px_rgba(99,102,241,0.15)]' 
+        : 'text-slate-400 hover:bg-white/5 hover:text-white border-l-4 border-transparent'
     }`;
 
   const iconClass = ({ isActive }) => 
-    `transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110 group-hover:text-blue/80'}`;
+    `transition-transform duration-300 ${isActive ? 'scale-110 text-indigo-400' : 'group-hover:scale-110 group-hover:text-indigo-400'}`;
 
   return (
-    <div className="sidebar fixed left-0 top-0 h-screen w-72 glass-panel border-r border-white/10 flex flex-col z-40 bg-dark/95 backdrop-blur-xl">
-      <div className="sidebar-logo p-6 flex items-center gap-3 mb-2 border-b border-white/5">
-        <div className="p-2 bg-gradient-to-br from-blue to-purple rounded-xl shadow-lg shadow-blue/20 flex-shrink-0">
-          <GraduationCap size={28} className="text-white" />
+    <div className="sidebar fixed left-0 top-0 h-screen w-72 border-r border-white/10 flex flex-col z-40 bg-[#030308]/95 backdrop-blur-2xl">
+      {/* Brand Header */}
+      <div className="sidebar-logo p-6 flex items-center gap-3 border-b border-white/10">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg shadow-indigo-500/20 flex-shrink-0">
+          <div className="w-full h-full bg-[#030308] rounded-[11px] flex items-center justify-center">
+            <GraduationCap size={22} className="text-indigo-400" />
+          </div>
         </div>
-        <h1 className="text-2xl font-bold font-heading tracking-wide">
-          Rural<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue to-purple">Verse</span> <span className="font-light text-gray-300 text-lg">AI</span>
+        <h1 className="text-xl font-bold font-heading tracking-wide text-white">
+          Rural<span className="text-indigo-400">Verse</span> <span className="font-light text-slate-400 text-sm">AI</span>
         </h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6 custom-scrollbar space-y-8">
+      {/* Navigation Sections */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-7">
         
+        {/* LEARNING */}
         <div className="nav-section">
-          <h3 className="sidebar-section-title text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
-            <span className="w-4 h-[1px] bg-gray-600"></span> Learning
+          <h3 className="sidebar-section-title text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
+            <span className="w-3 h-[1px] bg-slate-700"></span> Learning
           </h3>
           <nav className="flex flex-col gap-1">
             <NavLink to="/dashboard" className={navClass}>
@@ -83,9 +76,10 @@ const Sidebar = () => {
           </nav>
         </div>
 
+        {/* IMMERSIVE */}
         <div className="nav-section">
-          <h3 className="sidebar-section-title text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
-            <span className="w-4 h-[1px] bg-gray-600"></span> Immersive
+          <h3 className="sidebar-section-title text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
+            <span className="w-3 h-[1px] bg-slate-700"></span> Immersive
           </h3>
           <nav className="flex flex-col gap-1">
             <NavLink to="/ar-lab" className={navClass}>
@@ -97,9 +91,10 @@ const Sidebar = () => {
           </nav>
         </div>
 
+        {/* ASSESSMENT */}
         <div className="nav-section">
-          <h3 className="sidebar-section-title text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
-            <span className="w-4 h-[1px] bg-gray-600"></span> Assessment
+          <h3 className="sidebar-section-title text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
+            <span className="w-3 h-[1px] bg-slate-700"></span> Assessment
           </h3>
           <nav className="flex flex-col gap-1">
             <NavLink to="/quiz" className={navClass}>
@@ -111,13 +106,14 @@ const Sidebar = () => {
           </nav>
         </div>
 
+        {/* RESOURCES */}
         <div className="nav-section">
-          <h3 className="sidebar-section-title text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
-            <span className="w-4 h-[1px] bg-gray-600"></span> Resources
+          <h3 className="sidebar-section-title text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
+            <span className="w-3 h-[1px] bg-slate-700"></span> Resources
           </h3>
           <nav className="flex flex-col gap-1">
             <NavLink to="/offline" className={navClass}>
-              {({isActive}) => <><WifiOff size={20} className={iconClass({isActive})} /> <span>Offline Learning</span></>}
+              {({isActive}) => <><WifiOff size={20} className={iconClass({isActive})} /> <span>Offline Mode</span></>}
             </NavLink>
             <NavLink to="/content" className={navClass}>
               {({isActive}) => <><FolderOpen size={20} className={iconClass({isActive})} /> <span>Content Library</span></>}
@@ -125,46 +121,50 @@ const Sidebar = () => {
           </nav>
         </div>
 
-        {(user.role === 'teacher' || user.role === 'admin') && (
-          <div className="nav-section bg-white/5 p-3 rounded-xl border border-white/5">
-            <h3 className="sidebar-section-title text-xs font-bold text-coral uppercase tracking-widest mb-3 px-2 flex items-center gap-2">
-              Management
-            </h3>
-            <nav className="flex flex-col gap-1">
-              <NavLink to="/teacher" className={navClass}>
-                {({isActive}) => (
-                  <>
-                    <BookOpen size={20} className={iconClass({isActive})} /> 
-                    <span className="flex-1">Teacher Dashboard</span>
-                    <span className="bg-coral text-white text-xs px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(247,37,133,0.5)]">3</span>
-                  </>
-                )}
-              </NavLink>
-              <NavLink to="/parent" className={navClass}>
-                {({isActive}) => <><Users size={20} className={iconClass({isActive})} /> <span>Parent Dashboard</span></>}
-              </NavLink>
-              <NavLink to="/admin" className={navClass}>
-                {({isActive}) => <><Shield size={20} className={iconClass({isActive})} /> <span>Admin Panel</span></>}
-              </NavLink>
-            </nav>
-          </div>
-        )}
+        {/* MANAGEMENT */}
+        <div className="nav-section bg-white/[0.02] p-3 rounded-2xl border border-white/5">
+          <h3 className="sidebar-section-title text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3 px-2 flex items-center gap-2">
+            Management
+          </h3>
+          <nav className="flex flex-col gap-1">
+            <NavLink to="/teacher" className={navClass}>
+              {({isActive}) => (
+                <>
+                  <BookOpen size={20} className={iconClass({isActive})} /> 
+                  <span className="flex-1">Teacher Portal</span>
+                  <span className="bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">3</span>
+                </>
+              )}
+            </NavLink>
+            <NavLink to="/parent" className={navClass}>
+              {({isActive}) => <><Users size={20} className={iconClass({isActive})} /> <span>Parent Overview</span></>}
+            </NavLink>
+            <NavLink to="/admin" className={navClass}>
+              {({isActive}) => <><Shield size={20} className={iconClass({isActive})} /> <span>Admin Panel</span></>}
+            </NavLink>
+          </nav>
+        </div>
+
       </div>
 
-      <div className="mt-auto p-4 border-t border-white/10 bg-black/20">
-        <div className="user-profile-mini flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+      {/* User Profile Mini Footer */}
+      <div className="mt-auto p-4 border-t border-white/10 bg-black/40">
+        <div className="user-profile-mini flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="relative">
-              <img src={user.avatar} alt="User Avatar" className="w-10 h-10 rounded-full border-2 border-blue/50 object-cover" />
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald rounded-full border-2 border-dark"></div>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-md">
+              {user?.avatar || 'AS'}
             </div>
             <div className="overflow-hidden flex-1">
-              <p className="text-sm font-semibold text-white truncate">{user.name}</p>
-              <p className="text-xs text-gray-400 capitalize truncate">{user.role}</p>
+              <p className="text-xs font-semibold text-white truncate">{user?.name || 'Aarav Sharma'}</p>
+              <p className="text-[10px] text-indigo-300 capitalize truncate">{user?.role || 'student'}</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="text-gray-400 hover:text-coral transition-colors p-2 rounded-lg hover:bg-coral/10" title="Logout">
-            <LogOut size={18} />
+          <button 
+            onClick={handleLogout} 
+            className="text-slate-400 hover:text-pink-400 transition-colors p-2 rounded-lg hover:bg-pink-500/10" 
+            title="Logout"
+          >
+            <LogOut size={16} />
           </button>
         </div>
       </div>

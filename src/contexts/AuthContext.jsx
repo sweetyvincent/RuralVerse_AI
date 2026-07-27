@@ -1,22 +1,49 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
+const defaultGuestUser = { 
+  id: 's1', 
+  name: 'Aarav Sharma', 
+  email: 'aarav@ruralverse.ai', 
+  role: 'student', 
+  avatar: 'AS', 
+  grade: 7, 
+  language: 'en', 
+  village: 'Rampura' 
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('ruralverse_user');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+    }
+    return defaultGuestUser;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const savedAuth = localStorage.getItem('ruralverse_auth');
+    if (savedAuth !== null) {
+      return savedAuth === 'true';
+    }
+    // Default to true so users can open all feature pages directly
+    return true;
+  });
 
   const login = (email, password, role = 'student') => {
-    // Simulated login
     const mockUsers = {
-      student: { id: 's1', name: 'Aarav Sharma', email, role: 'student', avatar: 'AS', grade: 7, language: 'en', village: 'Rampura' },
-      teacher: { id: 't1', name: 'Dr. Meera Krishnan', email, role: 'teacher', avatar: 'MK', subject: 'Science & Mathematics' },
-      parent: { id: 'p1', name: 'Rajesh Sharma', email, role: 'parent', avatar: 'RS', childId: 's1' },
-      admin: { id: 'a1', name: 'System Admin', email, role: 'admin', avatar: 'SA' },
+      student: { id: 's1', name: 'Aarav Sharma', email: email || 'aarav@ruralverse.ai', role: 'student', avatar: 'AS', grade: 7, language: 'en', village: 'Rampura' },
+      teacher: { id: 't1', name: 'Dr. Meera Krishnan', email: email || 'meera@ruralverse.ai', role: 'teacher', avatar: 'MK', subject: 'Science & Mathematics' },
+      parent: { id: 'p1', name: 'Rajesh Sharma', email: email || 'rajesh@ruralverse.ai', role: 'parent', avatar: 'RS', childId: 's1' },
+      admin: { id: 'a1', name: 'System Admin', email: email || 'admin@ruralverse.ai', role: 'admin', avatar: 'SA' },
     };
     
-    setUser(mockUsers[role] || mockUsers.student);
+    const loggedUser = mockUsers[role] || mockUsers.student;
+    setUser(loggedUser);
     setIsAuthenticated(true);
+    localStorage.setItem('ruralverse_user', JSON.stringify(loggedUser));
+    localStorage.setItem('ruralverse_auth', 'true');
     return true;
   };
 
@@ -33,17 +60,23 @@ export function AuthProvider({ children }) {
     };
     setUser(newUser);
     setIsAuthenticated(true);
+    localStorage.setItem('ruralverse_user', JSON.stringify(newUser));
+    localStorage.setItem('ruralverse_auth', 'true');
     return true;
   };
 
   const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
+    setUser(defaultGuestUser);
+    setIsAuthenticated(true); // Keep guest access open for features
+    localStorage.removeItem('ruralverse_user');
+    localStorage.setItem('ruralverse_auth', 'true');
   };
 
   const updateLanguage = (lang) => {
     if (user) {
-      setUser({ ...user, language: lang });
+      const updated = { ...user, language: lang };
+      setUser(updated);
+      localStorage.setItem('ruralverse_user', JSON.stringify(updated));
     }
   };
 
