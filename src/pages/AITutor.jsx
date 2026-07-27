@@ -23,8 +23,7 @@ export default function AITutor() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    // Initial welcome message
-    const welcomeText = `Hello${user ? ' ' + user.name : ''}! I am your AI Tutor for ${selectedSubject.name}. How can I help you today?`;
+    const welcomeText = `Hello${user ? ' ' + user.name : ''}! I am your AI Tutor for **${selectedSubject.name}**. 🎓\n\nI can help you with concepts, formulas, practice problems, and explanations.\n\nJust type your question below and press Enter!`;
     setMessages([{ id: 1, text: welcomeText, sender: 'ai' }]);
   }, [selectedSubject, user]);
 
@@ -56,112 +55,233 @@ export default function AITutor() {
   };
 
   const renderMessageContent = (text) => {
-    // Simple markdown rendering for bold and bullets
     const parts = text.split('\n').map((line, i) => {
       let formattedLine = line;
       // Bold
       formattedLine = formattedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Code blocks
+      formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background:rgba(99,102,241,0.15);padding:2px 6px;border-radius:4px;font-size:0.85em">$1</code>');
       // Bullets
       if (formattedLine.trim().startsWith('- ')) {
         formattedLine = `<li>${formattedLine.substring(2)}</li>`;
-        return <ul key={i} className="list-disc pl-5 mb-2" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
+        return <ul key={i} className="list-disc pl-5 mb-1" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
       }
-      return <p key={i} className="mb-2" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
+      if (formattedLine.trim() === '') return <br key={i} />;
+      return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
     });
     return parts;
   };
 
   return (
-    <div className="chat-container h-[calc(100vh-80px)] flex flex-col md:flex-row gap-4 p-4 md:p-6 mt-16">
-      {/* Left Panel */}
-      <div className="glass-card-static w-full md:w-[280px] p-4 flex flex-col h-full overflow-y-auto">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <MessageSquare className="text-accent-blue" />
+    <div style={{
+      display: 'flex',
+      flexDirection: 'row',
+      height: '100vh',
+      width: '100%',
+      overflow: 'hidden',
+      background: '#030308',
+      color: 'white',
+    }}>
+      {/* Left Panel — Subject Selector */}
+      <div style={{
+        width: '260px',
+        minWidth: '260px',
+        background: 'rgba(255,255,255,0.03)',
+        borderRight: '1px solid rgba(255,255,255,0.08)',
+        padding: '1.5rem 1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'auto',
+      }}>
+        <h2 style={{
+          fontSize: '1.2rem', fontWeight: '700', marginBottom: '1.5rem',
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          fontFamily: "'Outfit', sans-serif",
+        }}>
+          <MessageSquare size={20} style={{ color: '#818cf8' }} />
           Subjects
         </h2>
-        <div className="flex flex-col gap-2">
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           {subjects.map(subject => (
             <button
               key={subject.id}
               onClick={() => setSelectedSubject(subject)}
-              className={`p-3 rounded-xl flex items-center gap-3 transition-all ${
-                selectedSubject.id === subject.id 
-                  ? 'bg-white/10 border border-white/20 shadow-[0_0_15px_rgba(67,97,238,0.3)]' 
-                  : 'hover:bg-white/5 border border-transparent'
-              }`}
+              style={{
+                padding: '0.85rem 1rem',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                border: selectedSubject.id === subject.id ? '1px solid rgba(99,102,241,0.5)' : '1px solid transparent',
+                background: selectedSubject.id === subject.id ? 'rgba(99,102,241,0.15)' : 'transparent',
+                color: selectedSubject.id === subject.id ? '#a5b4fc' : '#94a3b8',
+                fontWeight: selectedSubject.id === subject.id ? '600' : '500',
+                fontSize: '0.9rem',
+                boxShadow: selectedSubject.id === subject.id ? '0 0 20px rgba(99,102,241,0.2)' : 'none',
+              }}
             >
-              <subject.icon className={subject.color} size={20} />
-              <span className="font-medium">{subject.name}</span>
+              <subject.icon size={20} />
+              {subject.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Right Panel - Chat Area */}
-      <div className="glass-card-static flex-1 flex flex-col h-full relative overflow-hidden">
+      {/* Right Panel — Chat Area */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
+      }}>
         {/* Chat Header */}
-        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg bg-white/5 ${selectedSubject.color}`}>
-              <selectedSubject.icon size={24} />
+        <div style={{
+          padding: '1rem 1.5rem',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(0,0,0,0.3)',
+          backdropFilter: 'blur(16px)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '44px', height: '44px', borderRadius: '0.75rem',
+              background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#818cf8',
+            }}>
+              <selectedSubject.icon size={22} />
             </div>
             <div>
-              <h3 className="font-bold text-lg">{selectedSubject.name} Tutor</h3>
-              <p className="text-xs text-white/50">AI is ready to help</p>
+              <h3 style={{ fontWeight: '700', fontSize: '1.1rem', fontFamily: "'Outfit', sans-serif" }}>
+                {selectedSubject.name} Tutor
+              </h3>
+              <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                🟢 AI is ready to help
+              </p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Languages size={18} className="text-white/70" />
-            <select 
-              value={selectedLanguage} 
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Languages size={16} style={{ color: '#64748b' }} />
+            <select
+              value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="bg-dark/50 border border-white/10 rounded-lg p-1 text-sm outline-none focus:border-accent-blue"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '0.5rem',
+                padding: '0.4rem 0.6rem',
+                fontSize: '0.8rem',
+                color: '#94a3b8',
+                outline: 'none',
+              }}
             >
               {languages?.map(lang => (
-                <option key={lang.code} value={lang.code}>{lang.name}</option>
-              )) || <option value="en">English</option>}
+                <option key={lang.code} value={lang.code} style={{ background: '#0f0f2e' }}>{lang.name}</option>
+              )) || <option value="en" style={{ background: '#0f0f2e' }}>English</option>}
             </select>
           </div>
         </div>
 
         {/* Chat Messages */}
-        <div className="chat-messages flex-1 overflow-y-auto p-4 space-y-4">
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}>
           {messages.map(msg => (
-            <div key={msg.id} className={`chat-message flex gap-3 max-w-[80%] ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
-              <div className={`chat-message-avatar w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 ${
-                msg.sender === 'user' ? 'bg-accent-purple/20 border border-accent-purple/30' : 'bg-accent-blue/20 border border-accent-blue/30'
-              }`}>
+            <div key={msg.id} style={{
+              display: 'flex',
+              gap: '0.75rem',
+              maxWidth: '80%',
+              alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+              flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row',
+              animation: 'fadeSlideIn 0.3s ease',
+            }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1rem', flexShrink: 0,
+                background: msg.sender === 'user'
+                  ? 'linear-gradient(135deg, #10b981, #06b6d4)'
+                  : 'linear-gradient(135deg, #6366f1, #a855f7)',
+                color: 'white', fontWeight: '600',
+                boxShadow: msg.sender === 'user'
+                  ? '0 4px 15px rgba(16,185,129,0.3)'
+                  : '0 4px 15px rgba(99,102,241,0.3)',
+              }}>
                 {msg.sender === 'user' ? (user?.initials || 'U') : '🤖'}
               </div>
-              <div className={`chat-message-bubble p-4 rounded-2xl ${
-                msg.sender === 'user' 
-                  ? 'bg-accent-purple/20 border border-accent-purple/20 rounded-tr-none' 
-                  : 'bg-white/5 border border-white/10 rounded-tl-none'
-              }`}>
+              <div style={{
+                padding: '1rem 1.25rem',
+                borderRadius: '1rem',
+                fontSize: '0.9rem',
+                lineHeight: '1.65',
+                ...(msg.sender === 'user' ? {
+                  background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                  color: 'white',
+                  borderBottomRightRadius: '4px',
+                  boxShadow: '0 4px 20px rgba(99,102,241,0.25)',
+                } : {
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e2e8f0',
+                  borderBottomLeftRadius: '4px',
+                }),
+              }}>
                 {renderMessageContent(msg.text)}
               </div>
             </div>
           ))}
-          
+
           {isTyping && (
-            <div className="chat-message flex gap-3 max-w-[80%]">
-              <div className="chat-message-avatar w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 bg-accent-blue/20 border border-accent-blue/30">
+            <div style={{
+              display: 'flex', gap: '0.75rem', maxWidth: '80%', alignSelf: 'flex-start',
+            }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1rem', flexShrink: 0, color: 'white',
+              }}>
                 🤖
               </div>
-              <div className="chat-message-bubble p-4 rounded-2xl bg-white/5 border border-white/10 rounded-tl-none flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-white/50 animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-2 h-2 rounded-full bg-white/50 animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 rounded-full bg-white/50 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              <div style={{
+                padding: '1rem 1.25rem', borderRadius: '1rem',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderBottomLeftRadius: '4px',
+                display: 'flex', alignItems: 'center', gap: '6px',
+              }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#818cf8', animation: 'typingBounce 1.4s infinite', animationDelay: '0ms' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#818cf8', animation: 'typingBounce 1.4s infinite', animationDelay: '0.2s' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#818cf8', animation: 'typingBounce 1.4s infinite', animationDelay: '0.4s' }} />
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input */}
-        <div className="chat-input-container p-4 border-t border-white/10 bg-black/20">
-          <form onSubmit={handleSendMessage} className="flex gap-2 relative">
+        {/* Chat Input — Fixed at Bottom */}
+        <div style={{
+          padding: '1rem 1.5rem',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(3,3,8,0.9)',
+          backdropFilter: 'blur(24px)',
+          flexShrink: 0,
+        }}>
+          <form onSubmit={handleSendMessage} style={{
+            display: 'flex', gap: '0.75rem', alignItems: 'flex-end',
+          }}>
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -171,21 +291,50 @@ export default function AITutor() {
                   handleSendMessage();
                 }
               }}
-              placeholder="Type your question here..."
-              className="flex-1 bg-dark/50 border border-white/10 rounded-xl py-3 px-4 outline-none focus:border-accent-blue resize-none h-[52px]"
+              placeholder={`Ask anything about ${selectedSubject.name}...`}
               rows="1"
+              style={{
+                flex: 1,
+                padding: '0.9rem 1.25rem',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '1rem',
+                color: 'white',
+                fontSize: '0.95rem',
+                resize: 'none',
+                outline: 'none',
+                fontFamily: "'Inter', sans-serif",
+                minHeight: '50px',
+                maxHeight: '120px',
+              }}
             />
-            <button 
+            <button
               type="button"
-              className="p-3 text-white/70 hover:text-white bg-dark/50 hover:bg-white/5 border border-white/10 rounded-xl transition-colors"
               title="Voice input"
+              style={{
+                width: '50px', height: '50px', borderRadius: '0.75rem',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#94a3b8', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
             >
               <Mic size={20} />
             </button>
-            <button 
+            <button
               type="submit"
               disabled={!inputText.trim() || isTyping}
-              className="p-3 bg-accent-blue hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-accent-blue text-white rounded-xl transition-colors shadow-[0_0_15px_rgba(67,97,238,0.3)]"
+              style={{
+                width: '50px', height: '50px', borderRadius: '50%',
+                background: (!inputText.trim() || isTyping) ? 'rgba(99,102,241,0.3)' : 'linear-gradient(135deg, #6366f1, #a855f7)',
+                color: 'white', cursor: (!inputText.trim() || isTyping) ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: 'none',
+                boxShadow: (!inputText.trim() || isTyping) ? 'none' : '0 4px 20px rgba(99,102,241,0.4)',
+                transition: 'all 0.3s',
+                flexShrink: 0,
+              }}
             >
               <Send size={20} />
             </button>
