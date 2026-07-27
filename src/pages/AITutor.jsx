@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Send, MessageSquare, BookOpen, Globe, Code, History as HistoryIcon, Calculator, TestTube, Languages } from 'lucide-react';
+import { Mic, Send, MessageSquare, BookOpen, Globe, Code, History as HistoryIcon, Calculator, TestTube, Languages, Sparkles, Key, Settings, X, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { languages } from '../data/languages';
-import { getAIResponse, simulateTypingDelay } from '../services/aiService';
+import { getAIResponse, simulateTypingDelay, getGeminiApiKey, setGeminiApiKey } from '../services/aiService';
 
 const subjects = [
   { id: 'math', name: 'Mathematics', icon: Calculator, color: 'text-blue-400' },
@@ -20,12 +20,20 @@ export default function AITutor() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+
+  // Gemini API Key state & modal
+  const [geminiKey, setGeminiKey] = useState(getGeminiApiKey());
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [keyInput, setKeyInput] = useState(getGeminiApiKey());
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const welcomeText = `Hello${user ? ' ' + user.name : ''}! I am your AI Tutor for **${selectedSubject.name}**. 🎓\n\nI can help you with concepts, formulas, practice problems, and explanations.\n\nJust type your question below and press Enter!`;
+    const isGeminiActive = Boolean(geminiKey);
+    const welcomeText = `Hello${user ? ' ' + user.name : ''}! I am your AI Tutor for **${selectedSubject.name}**. 🎓\n\n${isGeminiActive ? '✨ **Google Gemini AI 1.5 Flash Enabled**: Ask me any question in detail!' : '⚡ **Smart Offline Engine Active**: Ask me about formulas, concepts, practice problems, or code!'}\n\nType your question below to begin learning!`;
     setMessages([{ id: 1, text: welcomeText, sender: 'ai' }]);
-  }, [selectedSubject, user]);
+  }, [selectedSubject, user, geminiKey]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,14 +62,22 @@ export default function AITutor() {
     setIsTyping(false);
   };
 
+  const handleSaveApiKey = (e) => {
+    e.preventDefault();
+    setGeminiApiKey(keyInput);
+    setGeminiKey(keyInput.trim());
+    setSaveSuccess(true);
+    setTimeout(() => {
+      setSaveSuccess(false);
+      setShowKeyModal(false);
+    }, 1200);
+  };
+
   const renderMessageContent = (text) => {
     const parts = text.split('\n').map((line, i) => {
       let formattedLine = line;
-      // Bold
       formattedLine = formattedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Code blocks
       formattedLine = formattedLine.replace(/`(.*?)`/g, '<code style="background:rgba(99,102,241,0.15);padding:2px 6px;border-radius:4px;font-size:0.85em">$1</code>');
-      // Bullets
       if (formattedLine.trim().startsWith('- ')) {
         formattedLine = `<li>${formattedLine.substring(2)}</li>`;
         return <ul key={i} className="list-disc pl-5 mb-1" dangerouslySetInnerHTML={{ __html: formattedLine }} />;
@@ -81,6 +97,7 @@ export default function AITutor() {
       overflow: 'hidden',
       background: '#030308',
       color: 'white',
+      position: 'relative',
     }}>
       {/* Left Panel — Subject Selector */}
       <div style={{
@@ -128,6 +145,28 @@ export default function AITutor() {
             </button>
           ))}
         </div>
+
+        {/* Gemini API Status Box in Sidebar */}
+        <div style={{
+          marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <button
+            onClick={() => setShowKeyModal(true)}
+            style={{
+              width: '100%', padding: '0.75rem', borderRadius: '0.75rem',
+              background: geminiKey ? 'rgba(168,85,247,0.12)' : 'rgba(255,255,255,0.04)',
+              border: geminiKey ? '1px solid rgba(168,85,247,0.3)' : '1px solid rgba(255,255,255,0.1)',
+              color: geminiKey ? '#c084fc' : '#94a3b8',
+              display: 'flex', alignItems: 'center', gap: '0.6rem',
+              fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+              transition: 'all 0.3s',
+            }}
+          >
+            <Sparkles size={16} style={{ color: geminiKey ? '#c084fc' : '#94a3b8' }} />
+            <span>{geminiKey ? 'Gemini 1.5 Flash' : 'Setup Gemini API'}</span>
+            <Settings size={14} style={{ marginLeft: 'auto', opacity: 0.6 }} />
+          </button>
+        </div>
       </div>
 
       {/* Right Panel — Chat Area */}
@@ -162,31 +201,63 @@ export default function AITutor() {
               <h3 style={{ fontWeight: '700', fontSize: '1.1rem', fontFamily: "'Outfit', sans-serif" }}>
                 {selectedSubject.name} Tutor
               </h3>
-              <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                🟢 AI is ready to help
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
+                <span style={{ color: '#64748b' }}>🟢 AI Ready</span>
+                {geminiKey ? (
+                  <span style={{
+                    color: '#c084fc', background: 'rgba(168,85,247,0.15)',
+                    padding: '1px 8px', borderRadius: '1rem', border: '1px solid rgba(168,85,247,0.3)',
+                    fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '3px',
+                  }}>
+                    <Sparkles size={12} /> Gemini Active
+                  </span>
+                ) : (
+                  <span style={{
+                    color: '#818cf8', background: 'rgba(99,102,241,0.15)',
+                    padding: '1px 8px', borderRadius: '1rem', border: '1px solid rgba(99,102,241,0.3)',
+                    fontWeight: '600',
+                  }}>
+                    Offline Mode
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Languages size={16} style={{ color: '#64748b' }} />
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={() => setShowKeyModal(true)}
               style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '0.5rem',
-                padding: '0.4rem 0.6rem',
-                fontSize: '0.8rem',
-                color: '#94a3b8',
-                outline: 'none',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                padding: '0.4rem 0.8rem', borderRadius: '0.6rem', color: '#e2e8f0',
+                fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.4rem',
               }}
             >
-              {languages?.map(lang => (
-                <option key={lang.code} value={lang.code} style={{ background: '#0f0f2e' }}>{lang.name}</option>
-              )) || <option value="en" style={{ background: '#0f0f2e' }}>English</option>}
-            </select>
+              <Key size={14} style={{ color: geminiKey ? '#c084fc' : '#94a3b8' }} />
+              {geminiKey ? 'Gemini Key Saved' : 'Add Gemini Key'}
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Languages size={16} style={{ color: '#64748b' }} />
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '0.5rem',
+                  padding: '0.4rem 0.6rem',
+                  fontSize: '0.8rem',
+                  color: '#94a3b8',
+                  outline: 'none',
+                }}
+              >
+                {languages?.map(lang => (
+                  <option key={lang.code} value={lang.code} style={{ background: '#0f0f2e' }}>{lang.name}</option>
+                )) || <option value="en" style={{ background: '#0f0f2e' }}>English</option>}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -271,7 +342,7 @@ export default function AITutor() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input — Fixed at Bottom */}
+        {/* Chat Input */}
         <div style={{
           padding: '1rem 1.5rem',
           borderTop: '1px solid rgba(255,255,255,0.08)',
@@ -291,7 +362,7 @@ export default function AITutor() {
                   handleSendMessage();
                 }
               }}
-              placeholder={`Ask anything about ${selectedSubject.name}...`}
+              placeholder={`Ask anything about ${selectedSubject.name}... ${geminiKey ? '(Gemini AI Ready)' : ''}`}
               rows="1"
               style={{
                 flex: 1,
@@ -341,6 +412,111 @@ export default function AITutor() {
           </form>
         </div>
       </div>
+
+      {/* Gemini Settings Modal */}
+      {showKeyModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(16px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1rem',
+        }}>
+          <div style={{
+            background: '#0a0a20', border: '1px solid rgba(168,85,247,0.3)',
+            borderRadius: '1.2rem', padding: '1.75rem', width: '100%', maxWidth: '480px',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.8)', color: 'white',
+            position: 'relative',
+          }}>
+            <button
+              onClick={() => setShowKeyModal(false)}
+              style={{
+                position: 'absolute', top: '1rem', right: '1rem', background: 'transparent',
+                border: 'none', color: '#94a3b8', cursor: 'pointer',
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{
+                width: '42px', height: '42px', borderRadius: '0.75rem',
+                background: 'rgba(168,85,247,0.2)', border: '1px solid rgba(168,85,247,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc',
+              }}>
+                <Sparkles size={22} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', fontFamily: "'Outfit', sans-serif" }}>
+                  Google Gemini Integration
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Enable real-time AI responses using Gemini 1.5 Flash
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveApiKey} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Gemini API Key
+                </label>
+                <input
+                  type="password"
+                  value={keyInput}
+                  onChange={(e) => setKeyInput(e.target.value)}
+                  placeholder="AIzaSy..."
+                  style={{
+                    width: '100%', padding: '0.8rem 1rem', borderRadius: '0.75rem',
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)',
+                    color: 'white', fontSize: '0.9rem', outline: 'none',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                />
+                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.4rem' }}>
+                  Get your free API key at <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" style={{ color: '#c084fc', textDecoration: 'underline' }}>aistudio.google.com</a>. If no key is set, the offline response engine will be used.
+                </p>
+              </div>
+
+              {saveSuccess && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981',
+                  background: 'rgba(16,185,129,0.15)', padding: '0.6rem 1rem', borderRadius: '0.5rem',
+                  fontSize: '0.85rem', fontWeight: '500',
+                }}>
+                  <CheckCircle2 size={16} /> API Key Saved Successfully!
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1, padding: '0.8rem', borderRadius: '0.75rem',
+                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                    color: 'white', border: 'none', fontWeight: '600', fontSize: '0.9rem',
+                    cursor: 'pointer', boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
+                  }}
+                >
+                  Save API Key
+                </button>
+                {geminiKey && (
+                  <button
+                    type="button"
+                    onClick={() => { setKeyInput(''); setGeminiApiKey(''); setGeminiKey(''); }}
+                    style={{
+                      padding: '0.8rem 1rem', borderRadius: '0.75rem',
+                      background: 'rgba(236,72,153,0.15)', border: '1px solid rgba(236,72,153,0.3)',
+                      color: '#ec4899', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer',
+                    }}
+                  >
+                    Remove Key
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

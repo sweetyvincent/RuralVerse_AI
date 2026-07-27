@@ -1,8 +1,7 @@
 // ========================================
-// AI Tutor Service — Intelligent Response Engine
+// AI Tutor Service — Google Gemini API + Local Fallback Engine
 // ========================================
 
-// Maps subject IDs to their display names (used by AITutor.jsx)
 const subjectIdMap = {
   math: 'Mathematics',
   science: 'Science',
@@ -12,6 +11,61 @@ const subjectIdMap = {
   cs: 'Computer Science',
 };
 
+// Storage keys
+const GEMINI_KEY_STORAGE = 'ruralverse_gemini_api_key';
+
+export function getGeminiApiKey() {
+  return localStorage.getItem(GEMINI_KEY_STORAGE) || import.meta.env.VITE_GEMINI_API_KEY || '';
+}
+
+export function setGeminiApiKey(key) {
+  if (key) {
+    localStorage.setItem(GEMINI_KEY_STORAGE, key.trim());
+  } else {
+    localStorage.removeItem(GEMINI_KEY_STORAGE);
+  }
+}
+
+// Call Google Gemini API (gemini-1.5-flash)
+async function callGeminiApi(message, subjectName, language, apiKey) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+  const systemInstruction = `You are RuralVerse AI Tutor, an encouraging, patient, and world-class educational AI assistant designed specifically for rural school students.
+- Subject: ${subjectName}
+- Language Preference: ${language}
+- Guidelines: Give clear, simple, step-by-step explanations. Use bullet points (-), bold text (**), numbered steps, relevant emojis, and practical real-world examples. Keep formatting easy to read on mobile devices. Offer follow-up practice questions or hints when helpful.`;
+
+  const body = {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: `${systemInstruction}\n\nStudent Question: ${message}` }]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 1000,
+    }
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errJson = await response.json().catch(() => ({}));
+    throw new Error(errJson.error?.message || `Gemini API Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Empty response from Gemini API');
+  return text;
+}
+
+// Local Offline Fallback Engine
 const aiResponses = {
   Mathematics: {
     default: "Great question about Mathematics! Let me explain this concept step by step.\n\nIn mathematics, understanding the fundamentals is crucial. Let's break this down:\n\n📌 **Key Concept**: Every mathematical operation follows specific rules and properties.\n\n✅ **Step 1**: Identify what type of problem this is\n✅ **Step 2**: Apply the relevant formula or method\n✅ **Step 3**: Solve step by step\n✅ **Step 4**: Verify your answer\n\nWould you like me to solve a specific problem for you?",
@@ -55,7 +109,6 @@ const aiResponses = {
   }
 };
 
-// Enhanced keyword matching with broader coverage
 const keywordMap = [
   // Mathematics
   { keywords: ['integer', 'number', 'positive', 'negative', 'whole number'], response: 'Mathematics', topic: 'integers' },
@@ -91,12 +144,22 @@ const keywordMap = [
 
 export async function getAIResponse(message, subjectId = 'General', language = 'en') {
   const msg = message.toLowerCase().trim();
-  
-  // Resolve subject ID to name
   const subjectName = subjectIdMap[subjectId] || subjectId || 'General';
+  const apiKey = getGeminiApiKey();
+
+  // 1. Try Gemini API first if API key is provided
+  if (apiKey) {
+    try {
+      const geminiText = await callGeminiApi(message, subjectName, language, apiKey);
+      return geminiText;
+    } catch (err) {
+      console.warn("Gemini API call failed, falling back to offline engine:", err);
+    }
+  }
+
+  // 2. Offline Fallback Engine: Keyword matching
   const subjectResponses = aiResponses[subjectName] || aiResponses.General;
-  
-  // 1. Try keyword matching (cross-subject)
+
   for (const entry of keywordMap) {
     if (entry.keywords.some(kw => msg.includes(kw))) {
       const targetResponses = aiResponses[entry.response];
@@ -106,20 +169,17 @@ export async function getAIResponse(message, subjectId = 'General', language = '
     }
   }
   
-  // 2. Greeting
   if (['hello', 'hi', 'hey', 'help', 'what can you do', 'start'].some(g => msg.includes(g))) {
     return aiResponses.General.default;
   }
   
-  // 3. Thank you
   if (['thank', 'thanks', 'awesome', 'great', 'perfect', 'got it'].some(t => msg.includes(t))) {
     return "You're welcome! 😊 I'm glad I could help. Feel free to ask me anything else — I'm here to support your learning journey! 🚀";
   }
   
-  // 4. Fallback to selected subject's default
   return subjectResponses.default;
 }
 
 export async function simulateTypingDelay() {
-  return new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1000));
+  return new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 800));
 }
