@@ -1,5 +1,5 @@
-// Molecule database with 3D coordinates for procedural rendering
-// Each molecule has atoms (element + position) and bonds (connections + order)
+// Molecule & Science Experiment database with 3D coordinates and custom models
+// Includes Chemistry molecules, Physics mechanics/optics/astronomy, and Biology structures
 
 export const ELEMENT_COLORS = {
   H: '#ffffff',
@@ -72,7 +72,71 @@ const benzeneBonds = (startIdx = 0) => {
 };
 
 export const molecules = [
-  // ===================== BASIC MOLECULES =====================
+  // ===================== PHYSICS & ASTRONOMY =====================
+  {
+    id: 'solar-system',
+    name: 'Solar System',
+    formula: 'Sun & Planets',
+    aliases: ['sun', 'planets', 'earth', 'astronomy', 'orbit', 'solar'],
+    category: 'Physics',
+    type: 'solar-system',
+    description: 'Explore the celestial orbits of planets around the Sun in our Solar System.',
+    facts: ['Sun mass: 99.86% of solar system', '8 major planets', 'Gravitational orbits'],
+    atoms: [{ element: 'Fe', position: [0,0,0] }],
+    bonds: [],
+  },
+  {
+    id: 'simple-pendulum',
+    name: 'Simple Pendulum',
+    formula: 'T = 2π√(L/g)',
+    aliases: ['pendulum', 'gravity', 'oscillation', 'period', 'physics'],
+    category: 'Physics',
+    type: 'pendulum',
+    description: 'Simulate simple harmonic motion and measure periodic oscillation of a pendulum.',
+    facts: ['Period depends on length (L)', 'Independent of mass', 'Harmonic oscillator'],
+    atoms: [{ element: 'Fe', position: [0,0,0] }],
+    bonds: [],
+  },
+  {
+    id: 'prism-refraction',
+    name: 'Light Refraction (Prism)',
+    formula: 'n = c / v',
+    aliases: ['prism', 'refraction', 'light', 'rainbow', 'optics', 'spectrum'],
+    category: 'Physics',
+    type: 'prism',
+    description: 'See how white light bends and splits into a rainbow spectrum through a triangular glass prism.',
+    facts: ['Snell\'s Law of Refraction', 'Dispersion of light', 'Wavelength separation'],
+    atoms: [{ element: 'Fe', position: [0,0,0] }],
+    bonds: [],
+  },
+
+  // ===================== BIOLOGY =====================
+  {
+    id: 'dna-helix',
+    name: 'DNA Double Helix',
+    formula: 'Deoxyribonucleic Acid',
+    aliases: ['dna', 'genetics', 'gene', 'helix', 'double helix', 'chromosome'],
+    category: 'Biology',
+    type: 'dna',
+    description: 'Explore the iconic double helix molecular structure of DNA holding genetic instructions.',
+    facts: ['Discovered by Watson & Crick', 'Base pairs: A-T and C-G', 'Antiparallel strands'],
+    atoms: [{ element: 'C', position: [0,0,0] }],
+    bonds: [],
+  },
+  {
+    id: 'animal-cell',
+    name: 'Cell Structure & Organelles',
+    formula: 'Eukaryotic Cell',
+    aliases: ['cell', 'organelle', 'nucleus', 'biology', 'mitochondria', 'membrane'],
+    category: 'Biology',
+    type: 'cell',
+    description: 'Examine cellular structures including nucleus, nucleolus, mitochondria, and cell membrane.',
+    facts: ['Basic unit of life', 'Contains membrane-bound nucleus', 'Mitochondria = Powerhouse'],
+    atoms: [{ element: 'O', position: [0,0,0] }],
+    bonds: [],
+  },
+
+  // ===================== CHEMISTRY - BASIC =====================
   {
     id: 'water',
     name: 'Water',
@@ -540,13 +604,13 @@ export const molecules = [
       { element: 'O', position: [3.1, -0.9, 0] },
       { element: 'H', position: [3.9, -0.7, 0] },
       // OCOCH3 on C1
-      { element: 'O', position: [0.7 + 1.0, 0, 1.21 + 0.8] },
-      { element: 'C', position: [0.7 + 1.5, 0, 1.21 + 1.6] },
-      { element: 'O', position: [0.7 + 2.3, 0.6, 1.21 + 1.5] },
-      { element: 'C', position: [0.7 + 1.2, 0, 1.21 + 2.8] },
-      { element: 'H', position: [0.7 + 0.5, 0.8, 1.21 + 3.2] },
-      { element: 'H', position: [0.7 + 2.0, 0.3, 1.21 + 3.3] },
-      { element: 'H', position: [0.7 + 0.8, -0.9, 1.21 + 3.3] },
+      { element: 'O', position: [1.7, 0, 2.0] },
+      { element: 'C', position: [2.2, 0, 2.8] },
+      { element: 'O', position: [3.0, 0.6, 2.7] },
+      { element: 'C', position: [1.9, 0, 4.0] },
+      { element: 'H', position: [1.2, 0.8, 4.4] },
+      { element: 'H', position: [2.7, 0.3, 4.5] },
+      { element: 'H', position: [1.5, -0.9, 4.5] },
       // Remaining H on C2-C5
       ...benzeneHydrogens(0, 0, 0, 1.4, 2.5, [0, 1]),
     ],
@@ -567,7 +631,7 @@ export const molecules = [
     description: 'Caffeine is a central nervous system stimulant. It is the world\'s most widely consumed psychoactive drug, found in coffee, tea, and chocolate.',
     facts: ['Molecular weight: 194.19 g/mol', 'Found in coffee & tea', 'Blocks adenosine receptors'],
     atoms: [
-      // Purine ring system (simplified fused 5+6 ring)
+      // Purine ring system (fused 5+6 ring)
       { element: 'C', position: [0, 0, 0] },
       { element: 'N', position: [1.2, 0.5, 0] },
       { element: 'C', position: [2.0, -0.3, 0] },
@@ -580,7 +644,7 @@ export const molecules = [
       // Oxygens
       { element: 'O', position: [0.3, 1.2, 0] },
       { element: 'O', position: [-3.5, 0.7, 0] },
-      // Methyl groups (simplified)
+      // Methyl groups
       { element: 'C', position: [1.4, 1.8, 0] },
       { element: 'C', position: [-2.6, -2.0, 0] },
       { element: 'C', position: [-1.5, 2.3, 0] },
